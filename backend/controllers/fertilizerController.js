@@ -1,0 +1,90 @@
+// const csv = require("csv-parser");
+// const fs = require("fs");
+// const fertilizerData = require("../utils/fertilizerData");
+
+// const path = require('path');
+// const fertilizers = path.resolve(__dirname, '../utils/fertilizers.csv');
+
+
+// module.exports.fertilizerRecommendation = async (req, res) => {
+//   const cropName = req.body.cropname;
+//   const nitrogen = parseInt(req.body.nitrogen);
+//   const phosphorous = parseInt(req.body.phosphorous);
+//   const potassium = parseInt(req.body.potassium);
+//   // console.log("Input Data: ", cropName, nitrogen, phosphorous, potassium);
+
+//   // Reading the CSV data
+//   const data = [];
+//   fs.createReadStream(fertilizers)
+//     .pipe(csv())
+//     .on("data", (row) => {
+//       data.push(row);
+//     })
+//     .on("end", () => {
+//       const cropData = data.find((row) => row.Crop === cropName);
+//       // console.log("Finded crop:", cropData);
+
+//       if (cropData) {
+//         const n = cropData.N - nitrogen;
+//         const p = cropData.P - phosphorous;
+//         const k = cropData.K - potassium;
+//         // console.log("Calculations:", n, p, k);
+
+//         const temp = {
+//           abs_n: Math.abs(n),
+//           abs_p: Math.abs(p),
+//           abs_k: Math.abs(k),
+//         };
+//         const maxValue = Object.keys(temp).reduce((a, b) =>
+//           temp[a] > temp[b] ? a : b
+//         );
+
+//         let key;
+//         if (maxValue === "abs_n") {
+//           key = n < 0 ? "NHigh" : "NLow";
+//         } else if (maxValue === "abs_p") {
+//           key = p < 0 ? "PHigh" : "PLow";
+//         } else {
+//           key = k < 0 ? "KHigh" : "KLow";
+//         }
+
+//         // console.log("key:", key);
+//         // console.log(typeof key);
+
+//         // Finding the object in fertilizerData with the specified key
+//         const fertilizerObject = fertilizerData.find((obj) =>
+//           obj.hasOwnProperty(key)
+//         );
+
+//         if (fertilizerObject) {
+//           const recommendation = fertilizerObject[key];
+//           res.json({ recommendation });
+//         } else {
+//           res.status(404).json({ success: false, error: "Crop not found" });
+//         }
+//       }
+//     });
+// };
+// 🚀 Dummy Fertilizer Recommendation
+module.exports.fertilizerRecommendation = async (req, res) => {
+  try {
+    const { nitrogen, phosphorus, potassium } = req.body;
+
+    console.log("🌱 Received fertilizer data:", req.body);
+
+    let recommendation = "Balanced NPK";
+
+    if (nitrogen < 40) recommendation = "Urea (Nitrogen-rich)";
+    if (phosphorus < 20) recommendation = "DAP (Phosphorus-rich)";
+    if (potassium < 20) recommendation = "MOP (Potassium-rich)";
+
+    res.json({
+      recommendedFertilizer: recommendation,
+      inputs: { nitrogen, phosphorus, potassium }
+    });
+
+  } catch (error) {
+    console.error("❌ Fertilizer Recommendation Error:", error.message);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
